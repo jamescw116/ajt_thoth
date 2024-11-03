@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { usePathname, useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 import DropDown, { TDropDownOption } from "../Components/DropDown";
 import Button from "../Components/Button";
@@ -52,38 +53,35 @@ const TarotSpreadPosName = {
     , "Free": []
 }
 
-const CardName = {
-    Rider: []
-    , Thoth: [
-        'The Fool', 'The Magus', 'The Magus', 'The Magus'
-        , 'The Priestess', 'The Empress', 'The Emperor', 'The Hierophant'
-        , 'The Lovers', 'The Chariot', 'Adjustment', 'The Hermit', 'Fortune'
+const CardName = [
+    "The Fool", "The Magus", "The Magus", "The Magus"
+    , "The Priestess", "The Empress", "The Emperor", "The Hierophant"
+    , "The Lovers", "The Chariot", "Adjustment", "The Hermit", "Fortune"
 
-        , 'Lusts', 'The Hanged Man', 'Death', 'Arts', 'The Devil'
-        , 'The Tower', 'The Star', 'The Moon', 'The Sun', 'The Aeon', 'The Universe'
+    , "Lusts", "The Hanged Man", "Death", "Arts", "The Devil"
+    , "The Tower", "The Star", "The Moon", "The Sun", "The Aeon", "The Universe"
 
-        , 'Ace of Wands', 'Two of Wands', 'Three of Wands', 'Four of Wands', 'Five of Wands'
-        , 'Six of Wands', 'Seven of Wands', 'Eight of Wands', 'Nine of Wands', 'Ten of Wands'
-        , 'Princess of Wands', 'Prince of Wands', 'Queen of Wands', 'Knight of Wands'
+    , "Ace of Wands", "Two of Wands", "Three of Wands", "Four of Wands", "Five of Wands"
+    , "Six of Wands", "Seven of Wands", "Eight of Wands", "Nine of Wands", "Ten of Wands"
+    , "Princess of Wands", "Prince of Wands", "Queen of Wands", "Knight of Wands"
 
-        , 'Ace of Cups', 'Two of Cups', 'Three of Cups', 'Four of Cups', 'Five of Cups'
-        , 'Six of Cups', 'Seven of Cups', 'Eight of Cups', 'Nine of Cups', 'Ten of Cups'
-        , 'Princess of Cups', 'Prince of Cups', 'Queen of Cups', 'Knight of Cups'
+    , "Ace of Cups", "Two of Cups", "Three of Cups", "Four of Cups", "Five of Cups"
+    , "Six of Cups", "Seven of Cups", "Eight of Cups", "Nine of Cups", "Ten of Cups"
+    , "Princess of Cups", "Prince of Cups", "Queen of Cups", "Knight of Cups"
 
-        , 'Ace of Swords', 'Two of Swords', 'Three of Swords', 'Four of Swords', 'Five of Swords'
-        , 'Six of Swords', 'Seven of Swords', 'Eight of Swords', 'Nine of Swords', 'Ten of Swords'
-        , 'Princess of Swords', 'Prince of Swords', 'Queen of Swords', 'Knight of Swords'
+    , "Ace of Swords", "Two of Swords", "Three of Swords", "Four of Swords", "Five of Swords"
+    , "Six of Swords", "Seven of Swords", "Eight of Swords", "Nine of Swords", "Ten of Swords"
+    , "Princess of Swords", "Prince of Swords", "Queen of Swords", "Knight of Swords"
 
-        , 'Ace of Disks', 'Two of Disks', 'Three of Disks', 'Four of Disks', 'Five of Disks'
-        , 'Six of Disks', 'Seven of Disks', 'Eight of Disks', 'Nine of Disks', 'Ten of Disks'
-        , 'Princess of Disks', 'Prince of Disks', 'Queen of Disks', 'Knight of Disks'
-    ]
-};
+    , "Ace of Disks", "Two of Disks", "Three of Disks", "Four of Disks", "Five of Disks"
+    , "Six of Disks", "Seven of Disks", "Eight of Disks", "Nine of Disks", "Ten of Disks"
+    , "Princess of Disks", "Prince of Disks", "Queen of Disks", "Knight of Disks"
+];
 
 const fnShare = (url: string, baseUrl: string = "") => {
     const encodedUrl = encodeURIComponent(url);
     const shareUrl = baseUrl === "" ? url : `${baseUrl}${encodedUrl}`;
-    window.open(shareUrl, '_blank');
+    window.open(shareUrl, "_blank");
 }
 
 const fnGetShareTypes = (url: string): Array<TDropDownOption> => [
@@ -102,29 +100,30 @@ const fnShuffleRiffle = (oDeck: Array<number>): Array<number> => {
     const dkLenDec = Math.floor(oDeck.length / 10);
     const lLen = Math.floor(oDeck.length / 2) + (Math.floor(Math.random() * dkLenDec) - dkLenDec);
     const rLen = oDeck.length - lLen;
+
     let lPos = 0;
     let rPos = 0;
-    let lr = '';
+    let lr = "";
 
-    let nDeck = new Array(oDeck.length);
+    const nDeck: Array<number> = new Array(oDeck.length);
 
     for (let i = 0; i < oDeck.length; i++) {
-        lr = '';
+        lr = "";
 
         if (Math.floor(Math.random() * 2) == 1) {
-            lr = (lPos < lLen ? 'l' : 'r');
+            lr = (lPos < lLen ? "l" : "r");
         }
         else {
-            lr = (rPos < rLen ? 'r' : 'l');
+            lr = (rPos < rLen ? "r" : "l");
         }
 
         switch (lr) {
-            case 'l':
+            case "l":
                 nDeck[i] = oDeck[lPos];
                 lPos = lPos + 1;
                 break;
 
-            case 'r':
+            case "r":
                 nDeck[i] = oDeck[lLen + rPos];
                 rPos = rPos + 1;
                 break;
@@ -135,7 +134,7 @@ const fnShuffleRiffle = (oDeck: Array<number>): Array<number> => {
 }
 
 const fnShuffleOverhand = (oDeck: Array<number>): Array<number> => {
-    var cutAt = Math.floor(Math.random() * oDeck.length);
+    const cutAt = Math.floor(Math.random() * oDeck.length);
 
     return oDeck.slice(cutAt).concat(oDeck.slice(0, cutAt));
 }
@@ -190,7 +189,7 @@ const TarotRow: React.FC<{
                 {(cardIdx === -1
                     ? <div>&nbsp;</div>
                     : [
-                        <img key={`img_${cardIdx}`} onClick={() => { if (tarotDraw.draw) { fnSetView(cardIdx) } }} src={fnImgUrl(tarotDraw.draw ? tarotDraw.deck[cardIdx] : undefined)}
+                        <Image key={`img_${cardIdx}`} alt={CardName[cardIdx]} onClick={() => { if (tarotDraw.draw) { fnSetView(cardIdx) } }} src={fnImgUrl(tarotDraw.draw ? tarotDraw.deck[cardIdx] : undefined)}
                             className={`absolute inset-0 m-auto max-w-full max-h-full object-cover ${tarotDraw.draw ? "cursor-zoom-in" : ""}`}
                         />
                         , <div key={`name_${cardIdx}`}
@@ -205,19 +204,19 @@ const TarotRow: React.FC<{
     </div>
 }
 
-const Tarot = () => {
+const Tarot: React.FC = () => {
     const pathName = usePathname();
     const searchParams = useSearchParams();
 
-    const fnInitDeck = (nDeckType: string) => (
-        [...[...new Array(CardName[nDeckType as keyof typeof CardName].length).keys()].map((v => (v + 1)))]
+    const fnInitDeck = () => (
+        [...[...new Array(CardName.length).keys()].map((v => (v + 1)))]
     );
 
     const [view, setView] = useState<number | undefined>(undefined);
     const [baseUrl, setBaseUrl] = useState<string>("");
     const [tarotDrawArr, setTarotDrawArr] = useState<Array<TTarotDraw>>([{
         spread: "Relationship"
-        , deck: [...fnShuffle(fnInitDeck("Thoth"))]
+        , deck: [...fnShuffle(fnInitDeck())]
         , draw: false
         , picked: 0
     }]);
@@ -313,13 +312,13 @@ const Tarot = () => {
         }
 
         setBaseUrl(window.location.origin);
-    }, []);
+    }, [searchParams]);
 
     return <div className="w-screen h-screen bg-gray-950 p-5">
         <div className="w-full h-full relative bg-white bg-opacity-10 p-2 border-2 rounded-xl">
             <div className={`absolute inset-2 bg-black z-20 bg-opacity-80 flex flex-row flex-1 gap-1 ${view === undefined ? "hidden" : ""}`} onClick={() => setView(undefined)}>
                 <div className="relative flex flex-1 m-5">
-                    <img src={fnImgUrl(view !== undefined ? tarotDrawArr[tarotDrawIdx].deck[view] : undefined)}
+                    <Image alt={view !== undefined ? CardName[tarotDrawArr[tarotDrawIdx].deck[view]] : ""} src={fnImgUrl(view !== undefined ? tarotDrawArr[tarotDrawIdx].deck[view] : undefined)}
                         className="absolute w-full h-full max-w-full max-h-full object-contain cursor-zoom-out"
                     />
                 </div>

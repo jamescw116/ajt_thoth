@@ -5,15 +5,15 @@ import Button from "./Button";
 
 export type TDropDownOption = {
     display: ReactNode
-    , value?: any
+    , value?: number | string | Date | boolean | undefined
     , disabled?: boolean
-    , fnAction?: (params?: any) => void
+    , fnAction?: (params?: number | string | Date | boolean | undefined) => void
 }
 
 const DropDown: React.FC<{
     options: Array<string | TDropDownOption>
     , disabled?: boolean
-    , fnOnSelect?: (nOption: string) => any
+    , fnOnSelect?: (nOption: string) => void
     , classNames?: Array<string>
     , children?: ReactNode
 }> = ({ options, disabled, fnOnSelect, classNames, children }) => {
@@ -57,7 +57,7 @@ const DropDown: React.FC<{
 
                     const fnOnClick = () => {
                         if (fnOnSelect) {
-                            fnOnSelect(ddOpt.value);
+                            fnOnSelect((ddOpt.value ?? "").toString());
                         }
 
                         if (ddOpt.fnAction) {
