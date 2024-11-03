@@ -189,7 +189,7 @@ const TarotRow: React.FC<{
                 {(cardIdx === -1
                     ? <div>&nbsp;</div>
                     : [
-                        <Image key={`img_${cardIdx}`} alt={tarotDraw.draw ? CardName[cardIdx] : "back"} fill={true}
+                        <Image key={`img_${cardIdx}`} alt={tarotDraw.draw ? CardName[tarotDraw.deck[cardIdx] - 1] : "back"} fill={true}
                             onClick={() => { if (tarotDraw.draw && cnt > 1) { fnSetView(cardIdx) } }} 
                             src={fnImgUrl(tarotDraw.draw ? tarotDraw.deck[cardIdx] : undefined)}
                             className={`absolute w-full h-full max-w-full max-h-full object-contain ${tarotDraw.draw && cnt > 1 ? "cursor-zoom-in" : ""}`}
@@ -320,7 +320,7 @@ const Tarot: React.FC = () => {
             <div className={`absolute inset-2 bg-black z-20 bg-opacity-80 flex flex-row flex-1 gap-1 ${view === undefined ? "hidden" : ""}`} onClick={() => setView(undefined)}>
                 <div className="relative flex flex-1 m-5">
                     <Image fill={true}
-                        alt={view !== undefined ? CardName[tarotDrawArr[tarotDrawIdx].deck[view]] : ""}
+                        alt={view !== undefined ? CardName[tarotDrawArr[tarotDrawIdx].deck[view] - 1] : ""}
                         src={fnImgUrl(view !== undefined ? tarotDrawArr[tarotDrawIdx].deck[view] : undefined)}
                         className="absolute w-full h-full max-w-full max-h-full object-contain cursor-zoom-out"
                     />
