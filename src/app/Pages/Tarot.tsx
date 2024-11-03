@@ -313,7 +313,7 @@ const Tarot: React.FC = () => {
         if (pSpread.length > 0 && pDeck.length > 0) {
             setTarotDrawArr([{ spread: pSpread, deck: [...pDeck], draw: true, picked: pPicked }])
         }
-
+console.log(pathName)
         setBaseUrl(window.location.origin);
     }, [searchParams]);
 
