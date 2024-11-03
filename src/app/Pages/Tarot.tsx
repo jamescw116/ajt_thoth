@@ -161,17 +161,16 @@ const fnSpreadCardName = (tarotDraw: TTarotDraw, idx: number): string => (
         : TarotSpreadPosName[tarotDraw.spread as keyof typeof TarotSpreadPosName][idx]
 );
 
-const fnImgUrl = (baseUrl: string, cardIdx?: number): string => (
+const fnImgUrl = (cardIdx?: number): string => (
     `/img/thoth/${cardIdx === undefined ? "back" : `0${cardIdx}`.slice(-2)}.png`
 )
 
 const TarotRow: React.FC<{
-    baseUrl: string
-    , tarotDraw: TTarotDraw
+    tarotDraw: TTarotDraw
     , rowId: number
     , cnt: number
     , fnSetView: (cardIdx: number) => void
-}> = ({ baseUrl, tarotDraw, rowId, cnt, fnSetView }) => {
+}> = ({ tarotDraw, rowId, cnt, fnSetView }) => {
     const fnTwelveHseIdx = (x: number, y: number): number => (
         (y < 3 ? 6 - y : y) === (x > 3 ? 9 - x : x + 3)
             ? (y < 3 ? 12 - x : x)
@@ -190,8 +189,10 @@ const TarotRow: React.FC<{
                 {(cardIdx === -1
                     ? <div>&nbsp;</div>
                     : [
-                        <Image key={`img_${cardIdx}`} alt={CardName[cardIdx]} onClick={() => { if (tarotDraw.draw) { fnSetView(cardIdx) } }} src={fnImgUrl(baseUrl, tarotDraw.draw ? tarotDraw.deck[cardIdx] : undefined)}
-                            className={`absolute inset-0 m-auto max-w-full max-h-full object-cover ${tarotDraw.draw ? "cursor-zoom-in" : ""}`}
+                        <Image key={`img_${cardIdx}`} alt={CardName[cardIdx]} fill={true} objectFit="contain"
+                            onClick={() => { if (tarotDraw.draw && cnt > 1) { fnSetView(cardIdx) } }} 
+                            src={fnImgUrl(tarotDraw.draw ? tarotDraw.deck[cardIdx] : undefined)}
+                            className={`${tarotDraw.draw && cnt > 1 ? "cursor-zoom-in" : ""}`}
                         />
                         , <div key={`name_${cardIdx}`}
                             className={`absolute ${cardName.length === 0 ? "hidden" : ""} bottom-0 right-0 p-1 pr-2 bg-black bg-opacity-30`}
@@ -319,7 +320,9 @@ const Tarot: React.FC = () => {
         <div className="w-full h-full relative bg-white bg-opacity-10 p-2 border-2 rounded-xl">
             <div className={`absolute inset-2 bg-black z-20 bg-opacity-80 flex flex-row flex-1 gap-1 ${view === undefined ? "hidden" : ""}`} onClick={() => setView(undefined)}>
                 <div className="relative flex flex-1 m-5">
-                    <Image alt={view !== undefined ? CardName[tarotDrawArr[tarotDrawIdx].deck[view]] : ""} src={fnImgUrl(baseUrl, view !== undefined ? tarotDrawArr[tarotDrawIdx].deck[view] : undefined)}
+                    <Image fill={true} objectFit="contain"
+                        alt={view !== undefined ? CardName[tarotDrawArr[tarotDrawIdx].deck[view]] : ""}
+                        src={fnImgUrl(view !== undefined ? tarotDrawArr[tarotDrawIdx].deck[view] : undefined)}
                         className="absolute w-full h-full max-w-full max-h-full object-contain cursor-zoom-out"
                     />
                 </div>
@@ -337,12 +340,12 @@ const Tarot: React.FC = () => {
                 <Button fnOnClick={() => setTarotDrawIdx(p => (p < (tarotDrawArr.length - 1) ? p + 1 : p))} disabled={(tarotDrawIdx >= (tarotDrawArr.length - 1)) || !tarotDrawArr[tarotDrawIdx + 1].draw}>Next</Button>
             </div>
 
-            <div className={`w-full h-full flex flex-col flex-1 gap-1 p-2 text-white`}>
+            <div className={`w-full h-full flex flex-col flex-1 gap-1 p-5 text-white`}>
                 {Array.isArray(spreadCardCnt) && !spreadCardCnt.some(isNaN)
                     ? new Array(spreadCardCnt[0]).fill(spreadCardCnt[0]).map((vy: number, y: number) => (
-                        <TarotRow key={y} baseUrl={baseUrl} tarotDraw={tarotDrawArr[tarotDrawIdx]} rowId={y} cnt={spreadCardCnt[1]} fnSetView={setView} />
+                        <TarotRow key={y} tarotDraw={tarotDrawArr[tarotDrawIdx]} rowId={y} cnt={spreadCardCnt[1]} fnSetView={setView} />
                     ))
-                    : <TarotRow baseUrl={baseUrl} tarotDraw={tarotDrawArr[tarotDrawIdx]} rowId={0} cnt={spreadCardCnt as number} fnSetView={setView} />
+                    : <TarotRow tarotDraw={tarotDrawArr[tarotDrawIdx]} rowId={0} cnt={spreadCardCnt as number} fnSetView={setView} />
                 }
             </div>
         </div>
