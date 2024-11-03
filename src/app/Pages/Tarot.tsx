@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
 import DropDown, { TDropDownOption } from "../Components/DropDown";
@@ -161,17 +161,16 @@ const fnSpreadCardName = (tarotDraw: TTarotDraw, idx: number): string => (
         : TarotSpreadPosName[tarotDraw.spread as keyof typeof TarotSpreadPosName][idx]
 );
 
-const fnImgUrl = (pathName: string, cardIdx?: number): string => (
-    `${pathName}img/thoth/${cardIdx === undefined ? "back" : `0${cardIdx}`.slice(-2)}.png`
+const fnImgUrl = (cardIdx?: number): string => (
+    `${process.env.NEXT_PUBLIC_BASE_PATH}img/thoth/${cardIdx === undefined ? "back" : `0${cardIdx}`.slice(-2)}.png`
 )
 
 const TarotRow: React.FC<{
-    pathName: string
-    , tarotDraw: TTarotDraw
+    tarotDraw: TTarotDraw
     , rowId: number
     , cnt: number
     , fnSetView: (cardIdx: number) => void
-}> = ({ pathName, tarotDraw, rowId, cnt, fnSetView }) => {
+}> = ({ tarotDraw, rowId, cnt, fnSetView }) => {
     const fnTwelveHseIdx = (x: number, y: number): number => (
         (y < 3 ? 6 - y : y) === (x > 3 ? 9 - x : x + 3)
             ? (y < 3 ? 12 - x : x)
@@ -192,7 +191,7 @@ const TarotRow: React.FC<{
                     : [
                         <Image key={`img_${cardIdx}`} alt={tarotDraw.draw ? CardName[cardIdx] : "back"} fill={true}
                             onClick={() => { if (tarotDraw.draw && cnt > 1) { fnSetView(cardIdx) } }} 
-                            src={fnImgUrl(pathName, tarotDraw.draw ? tarotDraw.deck[cardIdx] : undefined)}
+                            src={fnImgUrl(tarotDraw.draw ? tarotDraw.deck[cardIdx] : undefined)}
                             className={`absolute w-full h-full max-w-full max-h-full object-contain ${tarotDraw.draw && cnt > 1 ? "cursor-zoom-in" : ""}`}
                         />
                         , <div key={`name_${cardIdx}`}
@@ -208,7 +207,6 @@ const TarotRow: React.FC<{
 }
 
 const Tarot: React.FC = () => {
-    const pathName = usePathname();
     const searchParams = useSearchParams();
 
     const fnInitDeck = () => (
@@ -278,12 +276,12 @@ const Tarot: React.FC = () => {
         );
     }
 
-    const shareUrl: string = `${baseUrl}${pathName}`
+    const shareUrl: string = `${baseUrl}${process.env.NEXT_PUBLIC_BASE_PATH}`
         + `?s=${tarotDrawArr[tarotDrawIdx].spread}`
         + `&d=${tarotDrawArr[tarotDrawIdx].deck
             .slice(0, typeof spreadCardCnt === "number"
                 ? spreadCardCnt
-                : spreadCardCnt.reduce((a: number, b: number) => (a + b), 0)
+                : spreadCardCnt.reduce((a: number, b: number) => (a * b), 1)
             ).join(",")}`
         + `&p=${tarotDrawArr[tarotDrawIdx].picked}`;
 
@@ -313,7 +311,7 @@ const Tarot: React.FC = () => {
         if (pSpread.length > 0 && pDeck.length > 0) {
             setTarotDrawArr([{ spread: pSpread, deck: [...pDeck], draw: true, picked: pPicked }])
         }
-console.log(pathName)
+
         setBaseUrl(window.location.origin);
     }, [searchParams]);
 
@@ -323,7 +321,7 @@ console.log(pathName)
                 <div className="relative flex flex-1 m-5">
                     <Image fill={true}
                         alt={view !== undefined ? CardName[tarotDrawArr[tarotDrawIdx].deck[view]] : ""}
-                        src={fnImgUrl(pathName, view !== undefined ? tarotDrawArr[tarotDrawIdx].deck[view] : undefined)}
+                        src={fnImgUrl(view !== undefined ? tarotDrawArr[tarotDrawIdx].deck[view] : undefined)}
                         className="absolute w-full h-full max-w-full max-h-full object-contain cursor-zoom-out"
                     />
                 </div>
@@ -344,9 +342,9 @@ console.log(pathName)
             <div className={`w-full h-full flex flex-col flex-1 gap-1 p-5 text-white`}>
                 {Array.isArray(spreadCardCnt) && !spreadCardCnt.some(isNaN)
                     ? new Array(spreadCardCnt[0]).fill(spreadCardCnt[0]).map((vy: number, y: number) => (
-                        <TarotRow key={y} pathName={pathName} tarotDraw={tarotDrawArr[tarotDrawIdx]} rowId={y} cnt={spreadCardCnt[1]} fnSetView={setView} />
+                        <TarotRow key={y} tarotDraw={tarotDrawArr[tarotDrawIdx]} rowId={y} cnt={spreadCardCnt[1]} fnSetView={setView} />
                     ))
-                    : <TarotRow pathName={pathName} tarotDraw={tarotDrawArr[tarotDrawIdx]} rowId={0} cnt={spreadCardCnt as number} fnSetView={setView} />
+                    : <TarotRow tarotDraw={tarotDrawArr[tarotDrawIdx]} rowId={0} cnt={spreadCardCnt as number} fnSetView={setView} />
                 }
             </div>
         </div>
