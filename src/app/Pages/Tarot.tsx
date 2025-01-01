@@ -190,7 +190,7 @@ const TarotRow: React.FC<{
                     ? <div>&nbsp;</div>
                     : [
                         <Image key={`img_${cardIdx}`} alt={tarotDraw.draw ? CardName[tarotDraw.deck[cardIdx] - 1] : "back"} fill={true}
-                            onClick={() => { if (tarotDraw.draw && cnt > 1) { fnSetView(cardIdx) } }} 
+                            onClick={() => { if (tarotDraw.draw && cnt > 1) { fnSetView(cardIdx) } }}
                             src={fnImgUrl(tarotDraw.draw ? tarotDraw.deck[cardIdx] : undefined)}
                             className={`absolute w-full h-full max-w-full max-h-full object-contain ${tarotDraw.draw && cnt > 1 ? "cursor-zoom-in" : ""}`}
                         />
@@ -232,7 +232,10 @@ const Tarot: React.FC = () => {
             , ...(newLog ? [p[p.length - 1]] : [])
             , {
                 ...nTarotDraw
-                , ...(newLog || !p[p.length - 1].draw ? { deck: [...fnShuffle(nTarotDraw.deck)] } : {})
+                , ...(newLog
+                    ? { deck: [...fnShuffle(nTarotDraw.deck)] } 
+                    : {}
+                )
             }
         ]));
 
@@ -248,29 +251,71 @@ const Tarot: React.FC = () => {
     );
 
     const fnDraw = () => {
+        setTarotDrawIdx(tarotDrawArr.length - 1);
+
+        switch (tarotDrawArr[tarotDrawArr.length - 1].spread) {
+            case "Free":
+                if (tarotDrawArr[tarotDrawArr.length - 1].draw === false) {
+                    fnLastUpdTarotDraw(
+                        {
+                            ...tarotDrawArr[tarotDrawArr.length - 1]
+                            , picked: tarotDrawArr[tarotDrawArr.length - 1].picked + 1
+                        }
+                        , false
+                    );
+                }
+
+                break;
+
+            default:
+                fnLastUpdTarotDraw(
+                    {
+                        ...tarotDrawArr[tarotDrawArr.length - 1]
+                        , draw: true
+                    }
+                    , tarotDrawArr[tarotDrawArr.length - 1].draw
+                );
+                break;
+        }
         fnLastUpdTarotDraw(
             {
-                ...tarotDrawArr[tarotDrawIdx]
-                , draw: true
+                ...tarotDrawArr[tarotDrawArr.length - 1]
                 , ...(
                     tarotDrawArr[tarotDrawArr.length - 1].spread === "Free"
-                        ? { picked: tarotDrawArr[tarotDrawArr.length - 1].picked + 1 }
-                        : {}
+                        ? tarotDrawArr[tarotDrawArr.length - 1].draw !== true
+                            ? { picked: tarotDrawArr[tarotDrawArr.length - 1].picked + 1 }
+                            : { picked: 1, draw: false }
+                        : { draw: true }
                 )
             }
-            , tarotDrawArr[tarotDrawArr.length - 1].spread === "Free"
-                ? false
-                : tarotDrawArr[tarotDrawArr.length - 1].draw
+            , tarotDrawArr[tarotDrawArr.length - 1].draw
         );
+    }
 
+    const fnShow = (nShow?: boolean) => {
+        let isShow = tarotDrawArr[tarotDrawIdx].draw;
+
+        if (nShow === true && tarotDrawIdx === (tarotDrawArr.length - 1)
+            && tarotDrawArr[tarotDrawIdx].spread === "Free"
+            && tarotDrawArr[tarotDrawIdx].picked > 0
+        ) {
+            isShow = nShow;
+
+            fnLastUpdTarotDraw({ ...tarotDrawArr[tarotDrawIdx], draw: true }, false);
+        }
+
+        return isShow;
     }
 
     const fnReset = () => {
+        setTarotDrawIdx(tarotDrawArr.length - 1);
+
         fnLastUpdTarotDraw(
             {
                 ...tarotDrawArr[tarotDrawArr.length - 1]
                 , draw: false
                 , picked: 0
+                , deck: [...fnShuffle(tarotDrawArr[tarotDrawArr.length - 1].deck)]
             }
             , tarotDrawArr[tarotDrawArr.length - 1].draw
         );
@@ -314,7 +359,7 @@ const Tarot: React.FC = () => {
 
         setBaseUrl(window.location.origin);
     }, [searchParams]);
-
+    console.log(tarotDrawArr)
     return <div className="w-screen h-screen bg-gray-950 p-5">
         <div className="w-full h-full relative bg-white bg-opacity-10 p-2 border-2 rounded-xl">
             <div className={`absolute inset-2 bg-black z-20 bg-opacity-80 flex flex-row flex-1 gap-1 ${view === undefined ? "hidden" : ""}`} onClick={() => setView(undefined)}>
@@ -330,6 +375,7 @@ const Tarot: React.FC = () => {
             <div className="absolute left-2 flex flex-row z-10 gap-1 p-1 rounded-lg bg-black bg-opacity-30">
                 <DropDown options={[...TarotSpread]} fnOnSelect={fnSpread}>{tarotDrawArr[tarotDrawIdx].spread}</DropDown>
                 <Button fnOnClick={fnDraw}>Draw</Button>
+                <Button fnOnClick={() => fnShow(!tarotDrawArr[tarotDrawIdx].draw)} classNames={[...(tarotDrawArr[tarotDrawIdx].spread !== "Free" ? ["hidden"] : [])]}>Show</Button>
                 <Button fnOnClick={fnReset} classNames={[...(tarotDrawArr[tarotDrawIdx].spread !== "Free" ? ["hidden"] : [])]}>Reset</Button>
                 <DropDown options={fnGetShareTypes(shareUrl)} disabled={!tarotDrawArr[tarotDrawIdx].draw}>Share</DropDown>
             </div>
